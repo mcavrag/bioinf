@@ -29,12 +29,7 @@ int Helper::readInputFa(string inputFilePath, string& S)
 		}
 		S += line;
 	}
-
-	// This is added to signal the end of the sequences
-	S.resize(S.size() + 1);
-	S[S.size() - 1] = '$';
-	inputFile.close();
-
+	
 	return 0;
 }
 
