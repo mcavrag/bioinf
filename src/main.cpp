@@ -3,13 +3,12 @@
 #include <string>
 #include <sdsl/suffix_arrays.hpp>
 #include <sdsl/lcp.hpp>
-#include <sais.hxx>
 #include "helper.h"
 
 using namespace std;
 using namespace sdsl;
 
-#define SEQUENCE_SEPARATOR__INT_VALUE ('%' - 48)
+#define SEQUENCE_SEPARATOR_INT_VALUE ('%' - 48)
 
 struct Node {
 	uint64_t id;
@@ -131,7 +130,7 @@ void createCompressedGraph(uint64_t k, string BWT)
    	cout << "Right max: " << rightMax << endl;
    	cout << "Left max: " << leftMax << endl;
 
-	for(int s = 1; s <= cArray[SEQUENCE_SEPARATOR__INT_VALUE]; s++) 
+	for(int s = 1; s <= cArray[SEQUENCE_SEPARATOR_INT_VALUE]; s++) 
 	{
 		int id = rightMax + leftMax + s;
 		graph.push_back(Node(1, s, 1, s, 0));

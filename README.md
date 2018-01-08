@@ -33,8 +33,10 @@ sudo ./install.sh /usr/local
 ## Compiling
 
 ```sh
-cd REPO_NAME
-cmake --build cmake-build-debug --target debruijn.exe -- -j 4
+mkdir build
+cd build
+cmake --target debruijn.exe ..
+make -j4
 ```
 
 ## Running
