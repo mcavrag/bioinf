@@ -4,29 +4,30 @@
 #include <sdsl/suffix_arrays.hpp>
 #include <sdsl/lcp.hpp>
 #include "helper.h"
+#include <typeinfo> 
 
 using namespace std;
 using namespace sdsl;
 
-#define SEQUENCE_SEPARATOR_INT_VALUE ('%' - 48)
+#define SEQUENCE_SEPARATOR_INT_VALUE (int('A'))
+#define ALPHABET_SIZE 6
 
 struct Node {
-	uint64_t id;
-	uint64_t lb;
-	uint64_t rb;
 	uint64_t len;
+	uint64_t lb;
+	uint64_t size;
 	uint64_t suffix_lb;
 
-	Node(uint64_t id, uint64_t lb, uint64_t rb, uint64_t len, uint64_t suffix_lb) : id(id), lb(lb), rb(rb), len(len), suffix_lb(suffix_lb) {}
+	Node(uint64_t len, uint64_t lb, uint64_t size, uint64_t suffix_lb) : len(len), lb(lb), size(size), suffix_lb(suffix_lb) {}
 };
 
 string S = "";
+wt_huff<> wt;
 vector<uint64_t> cArray(UCHAR_MAX + 1, 0);
 
 void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_t>& Q, bit_vector& Bl, bit_vector& Br)
 {
 	// Construct WT used for C array from BWT
-	wt_huff<> wt;
 	construct_im(wt, BWT, 1);
 
 	// Construct LCP from sequence
@@ -45,11 +46,14 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_
 		}
 	}
 
-	Bl = bit_vector(S.size(), 0);
-	Br = bit_vector(S.size(), 0);
+	cout << cArray << endl;
+
+	Bl = bit_vector(BWT.size(), 0);
+	Br = bit_vector(BWT.size(), 0);
 
 	cout << lcp.size() << endl;
 	cout << S.size() << endl;
+	cout << BWT.size() << endl;
 
 	bool open = false;
 	uint64_t lb = 1;
@@ -72,7 +76,7 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_
 				{
 					Br[lb] = 1;
 					Br[i-1] = 1;
-					graph.push_back(Node(k, lb, i - lb, lb, 0));
+					graph.push_back(Node(k, lb, i - lb, lb));
 					Q.push(counter++);
 				}
 				if(lastDiff > lb)
@@ -109,7 +113,9 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_
 		}
 	}
 
-	cout << "Vector Bl: " << Bl << endl;
+	cout << counter << endl;
+
+	//cout << "Vector Bl: " << Bl << endl;
 	cout << "Vector Br: " << Br << endl;
 }
 
@@ -125,23 +131,85 @@ void createCompressedGraph(uint64_t k, string BWT)
     bit_vector::rank_1_type Bl_rank(&Bl);
  
     uint64_t rightMax = Br_rank(S.size())/2.;
-    uint64_t leftMax = Bl_rank(S.size());
+    //uint64_t leftMax = Bl_rank(S.size());
 
    	cout << "Right max: " << rightMax << endl;
-   	cout << "Left max: " << leftMax << endl;
+   	//cout << "Left max: " << leftMax << endl;
 
 	for(int s = 1; s <= cArray[SEQUENCE_SEPARATOR_INT_VALUE]; s++) 
 	{
-		int id = rightMax + leftMax + s;
-		graph.push_back(Node(1, s, 1, s, 0));
+		int id = rightMax + s;
+		graph.push_back(Node(1, s, 1, s));
 		Q.push(id);
 		Bl[s] = 0;
 	}
 
-	/*while(!Q.empty())
-	{
+	cout << "Queue size " << Q.size() << endl;
 
-	}*/
+	cout << "wt sigma is " << wt.sigma << endl;
+
+	uint64_t quantity;
+	vector<uint8_t> list(wt.sigma);
+    vector<uint64_t> rank_c_i(wt.sigma);
+    vector<uint64_t> rank_c_j(wt.sigma);
+
+	while(!Q.empty())
+	{
+		int id = Q.front();
+		Q.pop();
+		bool extendable;
+
+		int count = 0;
+		uint64_t lb = 0;
+		uint64_t rb = 0;
+	
+		do {
+			extendable = false;
+
+			lb = graph.at(id-1).lb;
+			rb = lb + graph.at(id-1).size - 1;
+
+			cout << "interval is " << lb << ".."  << rb << endl << endl;
+			
+			cout << "len is " << graph.at(id-1).len << " ";
+			cout << "lb is " << graph.at(id-1).lb << " ";
+			cout << "size is " << graph.at(id-1).size << " ";
+			cout << "suffix_lb " << graph.at(id-1).suffix_lb << endl;
+
+			interval_symbols(wt, lb, rb, quantity, list, rank_c_i, rank_c_j);
+
+			cout << "\n" << "quantity is " << quantity << endl;
+
+			for(uint64_t i = 0; i < quantity; i++) 
+			{
+				char c = list.at(i);
+				lb = cArray[c] + rank_c_i[i] - 1;
+				cout << "left bound is " << lb << endl;
+				uint64_t ones = Br_rank(lb);
+				//cout << "ones is " << ones << endl;
+				if(!(ones % 2) && !Br[lb]) {
+					if(c != '\0' || c != '%') {
+						if(quantity == 1) {
+							extendable = true;
+							graph.at(id-1).len += 1;
+							graph.at(id-1).lb = lb;
+						}
+					}
+				}
+
+			}
+
+			cout << "len after change is " << graph.at(id-1).len << " ";
+			cout << "lb after change is " << graph.at(id-1).lb << " ";
+			cout << "size after change is " << graph.at(id-1).size << " ";
+			cout << "suffix_lb after change is " << graph.at(id-1).suffix_lb << endl;
+
+			if(++count == 2) return;
+
+		} while(extendable);
+	}
+
+	//cout << graph.size() << endl;
 
 }
 
