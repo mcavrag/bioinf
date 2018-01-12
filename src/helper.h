@@ -12,7 +12,7 @@ struct Helper {
 
 	static int readInputFa(string inputFilePath, string& S);
 
-    static int readInputK(string inputFilePath, uint64_t& k);
+    static int readInputK(string inputFilePath, int& k);
 
     //static int printToFile() - TODO
 };

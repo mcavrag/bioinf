@@ -23,9 +23,8 @@ struct Node {
 
 string S = "";
 wt_blcd<> wt;
-vector<uint64_t> cArray(UCHAR_MAX, 0);
 
-void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, deque<uint64_t>& Q, bit_vector& Bl, bit_vector& Br)
+void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q, bit_vector& Bl, bit_vector& Br)
 {
 	// Construct WT used for C array from BWT
 	construct_im(wt, BWT, 1);
@@ -37,6 +36,8 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, deque<uint64_
 	// Compute the C array.
 	uint64_t cSum = 0;
 
+	vector<uint64_t> cArray(UCHAR_MAX, 0);
+
 	for(int i = 0; i <= UCHAR_MAX; i++) 
 	{
 		if(wt.rank(wt.size(), i) != 0)
@@ -45,10 +46,6 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, deque<uint64_
 			cSum += wt.rank(wt.size(), i);
 		}
 	}
-
-	cArray['%']++;
-
-	cout << cArray << endl;
 
 	Bl = bit_vector(BWT.size()+1, 0);
 	Br = bit_vector(BWT.size()+1, 0);
@@ -81,13 +78,19 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, deque<uint64_
 
 	for(i = 1; i <= BWT.size(); i++) {
 		BWTshifted[i] = BWT[i-1];
+		if(BWTshifted[i] == '\0') {
+			BWTshifted[i] = '$';
+		}
 	}
+
+	cout << BWTshifted.size() << endl;
 
 	for(int i = 2; i < lcpFull.size(); i++)
 	{
 		cArray[BWTshifted[i-1]]++;
 		if(lcpFull[i] >= k)
 		{
+		//	cout << "last lcp is " << lcpFull[i] << " and k is " << k << endl;
 			open = true;
 			kIndex = (lcpFull[i] == k ? i : kIndex);
 		}
@@ -104,10 +107,10 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, deque<uint64_
 				}
 				if(lastDiff > lb)
 				{
-					for(int j = lb; j < i; j++)
+					for(int j = lb; j <= i-1; j++)
 					{
 						char c = BWTshifted[j];
-						if((c != 0) && (c != '%'))
+						if((c != '\0') && (c != '%'))
 						{
 							Bl[cArray[c]] = 1;
 						}
@@ -117,8 +120,12 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, deque<uint64_
 			}
 			lb = i;
 		}
+        //                        std::cout << "lastDiff is "<< lastDiff << " and k_index is " << kIndex << " and lb is " << lb << std::endl;
+		if(BWTshifted[i] != BWTshifted[i-1]) {
+			lastDiff = i;
+		//	 std::cout << "lastDiff is "<< lastDiff << endl;
 
-		if(BWTshifted[i] != BWTshifted[i-1]) lastDiff = i;
+		}
 	}
 	open = false;
 
@@ -167,9 +174,22 @@ void createCompressedGraph(uint64_t k, string BWT)
    	cout << "Right max: " << rightMax << endl;
    	cout << "Left max: " << leftMax << endl;
 
-    graph.resize(rightMax + leftMax + cArray['%']);
+   	vector<uint64_t> cArray(UCHAR_MAX, 0);
 
-	for(int s = 0; s < cArray['%']; s++) 
+   	int cSum = 0;
+
+	for(int i = 0; i <= UCHAR_MAX; i++) 
+	{
+		if(wt.rank(wt.size(), i) != 0)
+		{
+			cArray[i] = cSum;
+			cSum += wt.rank(wt.size(), i);
+		}
+	}
+
+    graph.resize(rightMax + leftMax + cArray['A']);
+
+	for(int s = 0; s < cArray['A']; s++) 
 	{
 		int id = rightMax + leftMax + s;
 		cout << "id is " << id << endl;
@@ -228,12 +248,12 @@ void createCompressedGraph(uint64_t k, string BWT)
 			{
 				char c = list[i];
 
-				cout << "c is " << c << " and cArray is " << cArray[c] << endl;
+				//cout << "c is " << c << " and cArray is " << cArray[c] << endl;
 
 				l = cArray[c] + rank_c_i[i];
 				r = cArray[c] + rank_c_j[i] - 1;
 
-				std::cout << "left bound is " << l << " and right bound is " << r << " and size is " << quantity << std::endl;
+				//std::cout << "left bound is " << l << " and right bound is " << r << " and size is " << quantity << std::endl;
 
 				uint64_t ones = Br_rank(l+1);
 
@@ -265,8 +285,6 @@ void createCompressedGraph(uint64_t k, string BWT)
 
 			}
 
-			if(count == 2) return;
-
 		} while(extendable);
 	}
 
@@ -297,7 +315,7 @@ int main(int argc, char** argv)
 
 	//cout << S << endl;
 
-	uint64_t k;
+	int k;
 
 	if(Helper::readInputK(argv[3], k))
 	{

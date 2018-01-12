@@ -33,7 +33,7 @@ int Helper::readInputFa(string inputFilePath, string& S)
 	return 0;
 }
 
-int Helper::readInputK(string inputFilePath, uint64_t& k)
+int Helper::readInputK(string inputFilePath, int& k)
 {
 	ifstream inputFile(inputFilePath);
 
