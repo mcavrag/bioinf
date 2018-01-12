@@ -4,13 +4,12 @@
 #include <sdsl/suffix_arrays.hpp>
 #include <sdsl/lcp.hpp>
 #include "helper.h"
-#include <typeinfo> 
+#include <deque>
 
 using namespace std;
 using namespace sdsl;
 
 #define SEQUENCE_SEPARATOR_INT_VALUE (int('A'))
-#define ALPHABET_SIZE 6
 
 struct Node {
 	uint64_t len;
@@ -18,14 +17,15 @@ struct Node {
 	uint64_t size;
 	uint64_t suffix_lb;
 
+	Node(): len(0), lb(0), size(0), suffix_lb(0) {}; 
 	Node(uint64_t len, uint64_t lb, uint64_t size, uint64_t suffix_lb) : len(len), lb(lb), size(size), suffix_lb(suffix_lb) {}
 };
 
 string S = "";
-wt_huff<> wt;
-vector<uint64_t> cArray(UCHAR_MAX + 1, 0);
+wt_blcd<> wt;
+vector<uint64_t> cArray(UCHAR_MAX, 0);
 
-void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_t>& Q, bit_vector& Bl, bit_vector& Br)
+void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, deque<uint64_t>& Q, bit_vector& Bl, bit_vector& Br)
 {
 	// Construct WT used for C array from BWT
 	construct_im(wt, BWT, 1);
@@ -37,7 +37,7 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_
 	// Compute the C array.
 	uint64_t cSum = 0;
 
-	for(int i = 0; i < UCHAR_MAX + 1; i++) 
+	for(int i = 0; i <= UCHAR_MAX; i++) 
 	{
 		if(wt.rank(wt.size(), i) != 0)
 		{
@@ -46,10 +46,12 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_
 		}
 	}
 
+	cArray['%']++;
+
 	cout << cArray << endl;
 
-	Bl = bit_vector(BWT.size(), 0);
-	Br = bit_vector(BWT.size(), 0);
+	Bl = bit_vector(BWT.size()+1, 0);
+	Br = bit_vector(BWT.size()+1, 0);
 
 	cout << lcp.size() << endl;
 	cout << S.size() << endl;
@@ -59,14 +61,35 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_
 	uint64_t lb = 1;
 	uint64_t kIndex = 0;
 	uint64_t lastDiff = 0;
-	uint64_t counter = 1;
+	uint64_t counter = 0;
 
-	for(int i = 1; i < lcp.size(); i++)
+	cout << lcp << endl;
+
+	vector<int> lcpFull(lcp.size()+2);
+
+	uint64_t i;
+
+	for(i = 2; i <= lcp.size(); i++) {
+		lcpFull[i] = lcp[i-1];
+	}
+
+	lcpFull[1] = -1;
+	lcpFull[i] = -1;
+	cout << lcpFull << endl;
+
+	vector<char> BWTshifted(BWT.size()+1);
+
+	for(i = 1; i <= BWT.size(); i++) {
+		BWTshifted[i] = BWT[i-1];
+	}
+
+	for(int i = 2; i < lcpFull.size(); i++)
 	{
-		if(lcp[i] >= k)
+		cArray[BWTshifted[i-1]]++;
+		if(lcpFull[i] >= k)
 		{
 			open = true;
-			kIndex = (lcp[i] == k ? i : kIndex);
+			kIndex = (lcpFull[i] == k ? i : kIndex);
 		}
 		else
 		{
@@ -76,15 +99,15 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_
 				{
 					Br[lb] = 1;
 					Br[i-1] = 1;
-					graph.push_back(Node(k, lb, i - lb, lb));
-					Q.push(counter++);
+					graph.push_back(Node(k, lb-1, i - lb, lb-1));
+					Q.push_back(counter++);
 				}
 				if(lastDiff > lb)
 				{
-					for(int j = lb; j < i-1; j++)
+					for(int j = lb; j < i; j++)
 					{
-						char c = BWT[j];
-						if((c != '\0') && (c != '%'))
+						char c = BWTshifted[j];
+						if((c != 0) && (c != '%'))
 						{
 							Bl[cArray[c]] = 1;
 						}
@@ -95,11 +118,13 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_
 			lb = i;
 		}
 
-		if(BWT[i] != BWT[i-1]) lastDiff = i;
+		if(BWTshifted[i] != BWTshifted[i-1]) lastDiff = i;
 	}
 	open = false;
 
-	for(int i = 0; i < S.size(); i++)
+	cout << lcpFull.size() << endl;
+
+	for(int i = 0; i < lcpFull.size()-1; i++)
 	{
 		if(open)
 		{
@@ -115,14 +140,20 @@ void createBitVectors(uint64_t k, string BWT, vector<Node>& graph, queue<uint64_
 
 	cout << counter << endl;
 
-	//cout << "Vector Bl: " << Bl << endl;
+	cout << cArray << endl;
+
+	cout << "Vector Bl: " << Bl << endl;
 	cout << "Vector Br: " << Br << endl;
+}
+
+static bool cmp(const Node &a, const Node &b){
+    return a.lb < b.lb;
 }
 
 void createCompressedGraph(uint64_t k, string BWT)
 {
     vector<Node> graph;
-    queue<uint64_t> Q;
+    deque<uint64_t> Q;
     bit_vector Bl, Br;
 
     createBitVectors(k, BWT, graph, Q, Bl, Br);
@@ -130,17 +161,20 @@ void createCompressedGraph(uint64_t k, string BWT)
     bit_vector::rank_1_type Br_rank(&Br);
     bit_vector::rank_1_type Bl_rank(&Bl);
  
-    uint64_t rightMax = Br_rank(S.size())/2.;
-    //uint64_t leftMax = Bl_rank(S.size());
+    uint64_t rightMax = Br_rank(BWT.size()+1)/2.;
+    uint64_t leftMax = Bl_rank(BWT.size()+1);
 
    	cout << "Right max: " << rightMax << endl;
-   	//cout << "Left max: " << leftMax << endl;
+   	cout << "Left max: " << leftMax << endl;
 
-	for(int s = 1; s <= cArray[SEQUENCE_SEPARATOR_INT_VALUE]; s++) 
+    graph.resize(rightMax + leftMax + cArray['%']);
+
+	for(int s = 0; s < cArray['%']; s++) 
 	{
-		int id = rightMax + s;
-		graph.push_back(Node(1, s, 1, s));
-		Q.push(id);
+		int id = rightMax + leftMax + s;
+		cout << "id is " << id << endl;
+		graph[id] = Node(1, s, 1, s);
+		Q.push_back(id);
 		Bl[s] = 0;
 	}
 
@@ -153,64 +187,97 @@ void createCompressedGraph(uint64_t k, string BWT)
     vector<uint64_t> rank_c_i(wt.sigma);
     vector<uint64_t> rank_c_j(wt.sigma);
 
+    cout << wt << endl;
+
+    for(int i = 0; i < wt.size(); i++) {
+    	if(wt[i] == 0) {cout << i << endl;}
+    }
+
+	int count = 0;
+	uint64_t id = 0;
+
+	uint64_t queueStartSize = Q.size();
+
 	while(!Q.empty())
 	{
-		int id = Q.front();
-		Q.pop();
+		if(count < queueStartSize) {
+			id = Q.front();
+			Q.pop_front();
+		} else {
+			id = Q.back();
+			Q.pop_back();
+		}
+
+		count++;
+
 		bool extendable;
 
-		int count = 0;
-		uint64_t lb = 0;
-		uint64_t rb = 0;
+		uint64_t lb = graph.at(id).lb;
+		uint64_t rb = lb + graph.at(id).size - 1;
+
+		uint64_t l = 0;
+		uint64_t r = 0;
+		uint64_t len = graph.at(id).len;
 	
 		do {
-			extendable = false;
+			extendable = false;	
 
-			lb = graph.at(id-1).lb;
-			rb = lb + graph.at(id-1).size - 1;
-
-			cout << "interval is " << lb << ".."  << rb << endl << endl;
-			
-			cout << "len is " << graph.at(id-1).len << " ";
-			cout << "lb is " << graph.at(id-1).lb << " ";
-			cout << "size is " << graph.at(id-1).size << " ";
-			cout << "suffix_lb " << graph.at(id-1).suffix_lb << endl;
-
-			interval_symbols(wt, lb, rb, quantity, list, rank_c_i, rank_c_j);
-
-			cout << "\n" << "quantity is " << quantity << endl;
+			interval_symbols(wt, lb, rb + 1, quantity, list, rank_c_i, rank_c_j);
 
 			for(uint64_t i = 0; i < quantity; i++) 
 			{
-				char c = list.at(i);
-				lb = cArray[c] + rank_c_i[i] - 1;
-				cout << "left bound is " << lb << endl;
-				uint64_t ones = Br_rank(lb);
-				//cout << "ones is " << ones << endl;
-				if(!(ones % 2) && !Br[lb]) {
-					if(c != '\0' || c != '%') {
+				char c = list[i];
+
+				cout << "c is " << c << " and cArray is " << cArray[c] << endl;
+
+				l = cArray[c] + rank_c_i[i];
+				r = cArray[c] + rank_c_j[i] - 1;
+
+				std::cout << "left bound is " << l << " and right bound is " << r << " and size is " << quantity << std::endl;
+
+				uint64_t ones = Br_rank(l+1);
+
+				if(!(ones % 2) && !Br[l+1]) {
+					if(c != 0 && c != '%') {
 						if(quantity == 1) {
 							extendable = true;
-							graph.at(id-1).len += 1;
-							graph.at(id-1).lb = lb;
+							len++;
+							lb = l;
+							rb = r;
+						} else {
+							uint64_t newId = rightMax + Bl_rank(l);
+
+							graph[newId] = Node(k, l, r-l+1, l);
+
+							Q.push_back(newId);
+
+							graph.at(id).lb = lb;
+							graph.at(id).len = len;
 						}
+					} else {
+						graph.at(id).lb = lb;
+						graph.at(id).len = len;
 					}
+				} else {
+					graph.at(id).lb = lb;
+					graph.at(id).len = len;
 				}
 
 			}
 
-			cout << "len after change is " << graph.at(id-1).len << " ";
-			cout << "lb after change is " << graph.at(id-1).lb << " ";
-			cout << "size after change is " << graph.at(id-1).size << " ";
-			cout << "suffix_lb after change is " << graph.at(id-1).suffix_lb << endl;
-
-			if(++count == 2) return;
+			if(count == 2) return;
 
 		} while(extendable);
 	}
 
-	//cout << graph.size() << endl;
+		vector<Node> G(graph.size());
+		for(int i = 0; i < graph.size(); ++i) G.push_back(graph[i]);
+		sort(G.begin(), G.end(), cmp);
 
+		for (int i = 0; i < G.size(); ++i){
+			if(!G[i].len) continue;
+			cout << G[i].len << " " <<  G[i].lb << " " << G[i].size << " " << G[i].suffix_lb  << endl;
+		}
 }
 
 int main(int argc, char** argv)
