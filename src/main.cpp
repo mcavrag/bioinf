@@ -24,8 +24,7 @@ struct Node {
 string S = "";
 wt_blcd<> wt;
 
-void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q, bit_vector& Bl, bit_vector& Br)
-{
+void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q, bit_vector& Bl, bit_vector& Br) {
 	// Construct WT used for C array from BWT
 	construct_im(wt, BWT, 1);
 
@@ -38,10 +37,8 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 
 	vector<uint64_t> cArray(UCHAR_MAX, 0);
 
-	for(int i = 0; i <= UCHAR_MAX; i++) 
-	{
-		if(wt.rank(wt.size(), i) != 0)
-		{
+	for (int i = 0; i <= UCHAR_MAX; i++) {
+		if (wt.rank(wt.size(), i) != 0) {
 			cArray[i] = cSum;
 			cSum += wt.rank(wt.size(), i);
 		}
@@ -66,7 +63,7 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 
 	uint64_t i;
 
-	for(i = 2; i <= lcp.size(); i++) {
+	for (i = 2; i <= lcp.size(); i++) {
 		lcpFull[i] = lcp[i-1];
 	}
 
@@ -76,42 +73,36 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 
 	vector<char> BWTshifted(BWT.size()+1);
 
-	for(i = 1; i <= BWT.size(); i++) {
+	for (i = 1; i <= BWT.size(); i++) {
 		BWTshifted[i] = BWT[i-1];
-		if(BWTshifted[i] == '\0') {
+		if (BWTshifted[i] == '\0') {
 			BWTshifted[i] = '$';
 		}
 	}
 
 	//cout << BWTshifted.size() << endl;
 
-	for(int i = 2; i < lcpFull.size(); i++)
-	{
+	for (int i = 2; i < lcpFull.size(); i++) {
 		cArray[BWTshifted[i-1]]++;
-		if(lcpFull[i] >= k)
-		{
+		if (lcpFull[i] >= k) {
 		//	cout << "last lcp is " << lcpFull[i] << " and k is " << k << endl;
 			open = true;
-			kIndex = (lcpFull[i] == k ? i : kIndex);
+			if (lcpFull[i] == k) {
+				kIndex = i;
+			}
 		}
-		else
-		{
-			if(open)
-			{
-				if(kIndex > lb)
-				{
+		else {
+			if (open) {
+				if (kIndex > lb) {
 					Br[lb] = 1;
 					Br[i-1] = 1;
 					graph.push_back(Node(k, lb-1, i - lb, lb-1));
 					Q.push_back(counter++);
 				}
-				if(lastDiff > lb)
-				{
-					for(int j = lb; j <= i-1; j++)
-					{
+				if (lastDiff > lb) {
+					for (int j = lb; j <= i-1; j++) {
 						char c = BWTshifted[j];
-						if((c != '\0') && (c != '%'))
-						{
+						if ((c != '\0') && (c != '%')) {
 							Bl[cArray[c]] = 1;
 						}
 					}
@@ -121,25 +112,23 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 			lb = i;
 		}
         //                        std::cout << "lastDiff is "<< lastDiff << " and k_index is " << kIndex << " and lb is " << lb << std::endl;
-		if(BWTshifted[i] != BWTshifted[i-1]) {
+		if (BWTshifted[i] != BWTshifted[i-1]) {
 			lastDiff = i;
 		//	 std::cout << "lastDiff is "<< lastDiff << endl;
-
 		}
 	}
 	open = false;
 
 	//cout << lcpFull.size() << endl;
 
-	for(int i = 0; i < lcpFull.size()-1; i++)
-	{
-		if(open)
-		{
+	for (int i = 0; i < lcpFull.size()-1; i++) {
+		if (open) {
 			Bl[i] = 0;
-			if(Br[i]) open = false;
+			if (Br[i]) {
+				open = false;
+			}
 		} 
-		else if(Br[i])
-		{
+		else if (Br[i]) {
 			Bl[i] = 0;
 			open = true;
 		}
@@ -178,9 +167,9 @@ void createCompressedGraph(int k, string BWT)
 
    	int cSum = 0;
 
-	for(int i = 0; i <= UCHAR_MAX; i++) 
+	for (int i = 0; i <= UCHAR_MAX; i++) 
 	{
-		if(wt.rank(wt.size(), i) != 0)
+		if (wt.rank(wt.size(), i) != 0)
 		{
 			cArray[i] = cSum;
 			cSum += wt.rank(wt.size(), i);
@@ -189,7 +178,7 @@ void createCompressedGraph(int k, string BWT)
 
     graph.resize(rightMax + leftMax + cArray['A']);
 
-	for(int s = 0; s < cArray['A']; s++) 
+	for (int s = 0; s < cArray['A']; s++) 
 	{
 		int id = rightMax + leftMax + s;
 		//cout << "id is " << id << endl;
@@ -209,7 +198,7 @@ void createCompressedGraph(int k, string BWT)
 
     //cout << wt << endl;
 
-    for(int i = 0; i < wt.size(); i++) {
+    for (int i = 0; i < wt.size(); i++) {
     	//if(wt[i] == 0) {cout << i << endl;}
     }
 
@@ -220,7 +209,7 @@ void createCompressedGraph(int k, string BWT)
 
 	while(!Q.empty())
 	{
-		if(count < queueStartSize) {
+		if (count < queueStartSize) {
 			id = Q.front();
 			Q.pop_front();
 		} else {
@@ -244,7 +233,7 @@ void createCompressedGraph(int k, string BWT)
 
 			interval_symbols(wt, lb, rb + 1, quantity, list, rank_c_i, rank_c_j);
 
-			for(uint64_t i = 0; i < quantity; i++) 
+			for (uint64_t i = 0; i < quantity; i++) 
 			{
 				char c = list[i];
 
@@ -257,9 +246,9 @@ void createCompressedGraph(int k, string BWT)
 
 				uint64_t ones = Br_rank(l+1);
 
-				if(!(ones % 2) && !Br[l+1]) {
-					if(c != 0 && c != '%') {
-						if(quantity == 1) {
+				if (!(ones % 2) && !Br[l+1]) {
+					if (c != 0 && c != '%') {
+						if (quantity == 1) {
 							extendable = true;
 							len++;
 							lb = l;
@@ -289,11 +278,13 @@ void createCompressedGraph(int k, string BWT)
 	}
 
 		vector<Node> G(graph.size());
-		for(int i = 0; i < graph.size(); ++i) G.push_back(graph[i]);
+		for (int i = 0; i < graph.size(); ++i) {
+			G.push_back(graph[i]);
+		}
 		sort(G.begin(), G.end(), cmp);
 
 		for (int i = 0; i < G.size(); ++i){
-			if(!G[i].len) continue;
+			if (!G[i].len) continue;
 			//cout << G[i].len << " " <<  G[i].lb << " " << G[i].size << " " << G[i].suffix_lb  << endl;
 		}
 }
@@ -301,13 +292,13 @@ void createCompressedGraph(int k, string BWT)
 int main(int argc, char** argv)
 {
 	// Check input parameters
-	if(argc != 4)
+	if (argc != 4)
 	{
 		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa output_file_name input/file_name_input.k" << endl;
 		return 1;
 	}
 
-	if(Helper::readInputFa(argv[1], S))
+	if (Helper::readInputFa(argv[1], S))
 	{
 		cerr << "Error in reading input_file_name.fa!" << endl;
 		return 1;
