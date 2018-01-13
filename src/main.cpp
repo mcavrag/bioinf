@@ -157,7 +157,7 @@ static bool cmp(const Node &a, const Node &b){
     return a.lb < b.lb;
 }
 
-void createCompressedGraph(uint64_t k, string BWT)
+void createCompressedGraph(int k, string BWT)
 {
     vector<Node> graph;
     deque<uint64_t> Q;
@@ -315,15 +315,10 @@ int main(int argc, char** argv)
 
 	//cout << S << endl;
 
-	int k;
+	string kString = argv[3];
+    int k = stoi(kString.substr(kString.size() - 1, kString.size()));
 
-	if(Helper::readInputK(argv[3], k))
-	{
-		cerr << "Error in reading file_name_input.k" << endl;
-		return 1;
-	}
-
-	//cout << k << endl;
+	cout << k << endl;
 
 	// constructing SA
 	csa_bitcompressed<> csa;

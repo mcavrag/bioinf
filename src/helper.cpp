@@ -32,28 +32,3 @@ int Helper::readInputFa(string inputFilePath, string& S)
 	
 	return 0;
 }
-
-int Helper::readInputK(string inputFilePath, int& k)
-{
-	ifstream inputFile(inputFilePath);
-
-	if (!inputFile.is_open())
-	{
-		cerr << "Unable to open file" << endl; 
-		return 1;	
-	} 
-
-	string line;
-
-	if(!getline (inputFile,line))
-	{
-		cerr << "Empty file!" << endl;
-		return 1;
-	}
-
-	k = stoi(line);
-
-	inputFile.close();
-
-	return 0;
-}
