@@ -146,7 +146,7 @@ static bool cmp(const Node &a, const Node &b){
     return a.lb < b.lb;
 }
 
-void createCompressedGraph(int k, string BWT)
+void createCompressedGraph(int k, string BWT, bool orginalPrint)
 {
     vector<Node> graph;
     deque<uint64_t> Q;
@@ -284,17 +284,24 @@ void createCompressedGraph(int k, string BWT)
 		sort(G.begin(), G.end(), cmp);
 
 		for (int i = 0; i < G.size(); ++i){
-			if (!G[i].len) continue;
-			//cout << G[i].len << " " <<  G[i].lb << " " << G[i].size << " " << G[i].suffix_lb  << endl;
+			if (!G[i].len) {
+				continue;
+			} else if (orginalPrint) {
+				cout << G[i].len << " " <<  G[i].lb << endl;
+			} else {
+				cout << G[i].len << " " <<  G[i].lb << " " << G[i].size << " " << G[i].suffix_lb << endl;
+			};
 		}
 }
 
 int main(int argc, char** argv)
 {
+	bool orginalPrint = false;
+
 	// Check input parameters
-	if (argc != 4)
+	if (argc != 3 && argc != 4)
 	{
-		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa output_file_name input/file_name_input.k" << endl;
+		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa -k=<Integer> --orginalPrint" << endl;
 		return 1;
 	}
 
@@ -306,10 +313,17 @@ int main(int argc, char** argv)
 
 	//cout << S << endl;
 
-	string kString = argv[3];
+	string kString = argv[2];
     int k = stoi(kString.substr(kString.size() - 1, kString.size()));
 
 	//cout << k << endl;
+
+	if ((argc == 4) && ((string)argv[3] == "--orginalPrint"))
+	{
+		orginalPrint = true;
+	}
+
+	//cout << orginalPrint << endl;
 
 	// constructing SA
 	csa_bitcompressed<> csa;
@@ -322,7 +336,7 @@ int main(int argc, char** argv)
 
     //cout << bwt << endl;
 
-	createCompressedGraph(k, bwt);
+	createCompressedGraph(k, bwt, orginalPrint);
 
 	return 0;
 }
