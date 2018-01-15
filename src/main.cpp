@@ -142,12 +142,12 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 	//cout << "Vector Br: " << Br << endl;
 }
 
-static bool cmp(const Node &a, const Node &b){
+static bool cmp(const Node &a, const Node &b) {
     return a.lb < b.lb;
 }
 
-void createCompressedGraph(int k, string BWT, bool orginalPrint)
-{
+void createCompressedGraph(int k, string BWT, bool orginalPrint) {
+
     vector<Node> graph;
     deque<uint64_t> Q;
     bit_vector Bl, Br;
@@ -167,10 +167,8 @@ void createCompressedGraph(int k, string BWT, bool orginalPrint)
 
    	int cSum = 0;
 
-	for (int i = 0; i <= UCHAR_MAX; i++) 
-	{
-		if (wt.rank(wt.size(), i) != 0)
-		{
+	for (int i = 0; i <= UCHAR_MAX; i++) {
+		if (wt.rank(wt.size(), i) != 0) {
 			cArray[i] = cSum;
 			cSum += wt.rank(wt.size(), i);
 		}
@@ -178,8 +176,7 @@ void createCompressedGraph(int k, string BWT, bool orginalPrint)
 
     graph.resize(rightMax + leftMax + cArray['A']);
 
-	for (int s = 0; s < cArray['A']; s++) 
-	{
+	for (int s = 0; s < cArray['A']; s++) {
 		int id = rightMax + leftMax + s;
 		//cout << "id is " << id << endl;
 		graph[id] = Node(1, s, 1, s);
@@ -207,8 +204,7 @@ void createCompressedGraph(int k, string BWT, bool orginalPrint)
 
 	uint64_t queueStartSize = Q.size();
 
-	while(!Q.empty())
-	{
+	while(!Q.empty()) {
 		if (count < queueStartSize) {
 			id = Q.front();
 			Q.pop_front();
@@ -233,8 +229,7 @@ void createCompressedGraph(int k, string BWT, bool orginalPrint)
 
 			interval_symbols(wt, lb, rb + 1, quantity, list, rank_c_i, rank_c_j);
 
-			for (uint64_t i = 0; i < quantity; i++) 
-			{
+			for (uint64_t i = 0; i < quantity; i++) {
 				char c = list[i];
 
 				//cout << "c is " << c << " and cArray is " << cArray[c] << endl;
@@ -270,10 +265,8 @@ void createCompressedGraph(int k, string BWT, bool orginalPrint)
 				} else {
 					graph.at(id).lb = lb;
 					graph.at(id).len = len;
-				}
-
+				}	
 			}
-
 		} while(extendable);
 	}
 
@@ -283,7 +276,7 @@ void createCompressedGraph(int k, string BWT, bool orginalPrint)
 		}
 		sort(G.begin(), G.end(), cmp);
 
-		for (int i = 0; i < G.size(); ++i){
+		for (int i = 0; i < G.size(); ++i) {
 			if (!G[i].len) {
 				continue;
 			} else if (orginalPrint) {
@@ -294,19 +287,16 @@ void createCompressedGraph(int k, string BWT, bool orginalPrint)
 		}
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	bool orginalPrint = false;
 
 	// Check input parameters
-	if (argc != 3 && argc != 4)
-	{
+	if (argc != 3 && argc != 4) {
 		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa -k=<Integer> --orginalPrint" << endl;
 		return 1;
 	}
 
-	if (Helper::readInputFa(argv[1], S))
-	{
+	if (Helper::readInputFa(argv[1], S)) {
 		cerr << "Error in reading input_file_name.fa!" << endl;
 		return 1;
 	}
@@ -318,8 +308,7 @@ int main(int argc, char** argv)
 
 	//cout << k << endl;
 
-	if ((argc == 4) && ((string)argv[3] == "--orginalPrint"))
-	{
+	if ((argc == 4) && ((string)argv[3] == "--orginalPrint")) {
 		orginalPrint = true;
 	}
 
