@@ -24,8 +24,7 @@ struct Node {
 string S = "";
 wt_blcd<> wt;
 
-void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q, bit_vector& Bl, bit_vector& Br)
-{
+void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q, bit_vector& Bl, bit_vector& Br) {
 	// Construct WT used for C array from BWT
 	construct_im(wt, BWT, 1);
 
@@ -38,10 +37,8 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 
 	vector<uint64_t> cArray(UCHAR_MAX, 0);
 
-	for(int i = 0; i <= UCHAR_MAX; i++) 
-	{
-		if(wt.rank(wt.size(), i) != 0)
-		{
+	for(int i = 0; i <= UCHAR_MAX; i++) {
+		if(wt.rank(wt.size(), i) != 0) {
 			cArray[i] = cSum;
 			cSum += wt.rank(wt.size(), i);
 		}
@@ -72,34 +69,25 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 
 	//cout << BWTshifted.size() << endl;
 
-	for(int i = 1; i <= lcp.size(); i++)
-	{
+	for(int i = 1; i <= lcp.size(); i++) {
 		cArray[BWT[i-1]]++;
-		if(lcp[i] >= k)
-		{
+		if(lcp[i] >= k) {
 		//	cout << "last lcp is " << lcpFull[i] << " and k is " << k << endl;
 			open = true;
 			kIndex = (lcp[i] == k ? i : kIndex);
-		}
-		else
-		{
-			if(open)
-			{
-				if(kIndex > lb)
-				{
+		} else {
+			if(open) {
+				if(kIndex > lb) {
 					Br[lb] = 1;
 					Br[i-1] = 1;
 					graph.push_back(Node(k, lb, i - lb, lb));
 					Q.push_back(counter++);
 				}
-				if(lastDiff > lb)
-				{
-					for(int j = lb; j < i; j++)
-					{
+				if(lastDiff > lb) {
+					for(int j = lb; j < i; j++) {
 						char c = BWT[j];
 //						cout << c  << "----" << cArray[c] << endl;
-						if((c != 0) && (c != '%'))
-						{
+						if((c != 0) && (c != '%')) {
 							Bl[cArray[c]-1] = 1;
 						}
 					}
@@ -112,20 +100,15 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 		if(BWT[i] != BWT[i-1]) {
 			lastDiff = i;
 //			 std::cout << "lastDiff is "<< lastDiff << endl;
-
 		}
 	}
 	open = false;
 
-	for(int i = 0; i < lcp.size(); i++)
-	{
-		if(open)
-		{
+	for(int i = 0; i < lcp.size(); i++) {
+		if(open) {
 			Bl[i] = 0;
 			if(Br[i]) open = false;
-		} 
-		else if(Br[i])
-		{
+		} else if(Br[i]) {
 			Bl[i] = 0;
 			open = true;
 		}
@@ -139,12 +122,11 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 	//cout << "Vector Br: " << Br << endl;
 }
 
-static bool cmp(const Node &a, const Node &b){
+static bool cmp(const Node &a, const Node &b) {
     return a.lb < b.lb;
 }
 
-void createCompressedGraph(uint64_t k, string BWT)
-{
+void createCompressedGraph(uint64_t k, string BWT) {
     vector<Node> graph;
     deque<uint64_t> Q;
     bit_vector Bl, Br;
@@ -164,10 +146,8 @@ void createCompressedGraph(uint64_t k, string BWT)
 
    	int cSum = 0;
 
-	for(int i = 0; i <= UCHAR_MAX; i++) 
-	{
-		if(wt.rank(wt.size(), i) != 0)
-		{
+	for(int i = 0; i <= UCHAR_MAX; i++) {
+		if(wt.rank(wt.size(), i) != 0) {
 			cArray[i] = cSum;
 			cSum += wt.rank(wt.size(), i);
 		}
@@ -175,8 +155,7 @@ void createCompressedGraph(uint64_t k, string BWT)
 
     graph.resize(rightMax + leftMax + cArray['A']);
 
-	for(int s = 0; s < cArray['A']; s++) 
-	{
+	for(int s = 0; s < cArray['A']; s++) {
 		int id = rightMax + leftMax + s;
 		//cout << "id is " << id << endl;
 		graph[id] = Node(1, s, 1, s);
@@ -204,8 +183,7 @@ void createCompressedGraph(uint64_t k, string BWT)
 
 	uint64_t queueStartSize = Q.size();
 
-	while(!Q.empty())
-	{
+	while(!Q.empty()) {
 		if(count < queueStartSize) {
 			id = Q.front();
 			Q.pop_front();
@@ -230,8 +208,7 @@ void createCompressedGraph(uint64_t k, string BWT)
 
 			interval_symbols(wt, lb, rb+1, quantity, list, rank_c_i, rank_c_j);
 
-			for(uint64_t i = 0; i < quantity; i++) 
-			{
+			for(uint64_t i = 0; i < quantity; i++) {
 				char c = list[i];
 
 				//cout << "c is " << c << " and cArray is " << cArray[c] << endl;
@@ -273,23 +250,20 @@ void createCompressedGraph(uint64_t k, string BWT)
 		for(int i = 0; i < graph.size(); ++i) G.push_back(graph[i]);
 		sort(G.begin(), G.end(), cmp);
 
-		for (int i = 0; i < G.size(); ++i){
+		for (int i = 0; i < G.size(); ++i) {
 			if(!G[i].len) continue;
 			cout << G[i].len << " " <<  G[i].lb << " " << G[i].size << " " << G[i].suffix_lb << endl;
 		}
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
 	// Check input parameters
-	if(argc != 4)
-	{
+	if(argc != 4) {
 		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa output_file_name input/file_name_input.k" << endl;
 		return 1;
 	}
 
-	if(Helper::readInputFa(argv[1], S))
-	{
+	if(Helper::readInputFa(argv[1], S)) {
 		cerr << "Error in reading input_file_name.fa!" << endl;
 		return 1;
 	}
@@ -298,8 +272,7 @@ int main(int argc, char** argv)
 
 	int k;
 
-	if(Helper::readInputK(argv[3], k))
-	{
+	if(Helper::readInputK(argv[3], k)) {
 		cerr << "Error in reading file_name_input.k" << endl;
 		return 1;
 	}
