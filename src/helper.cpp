@@ -13,7 +13,7 @@ int Helper::readInputFa(string inputFilePath, string& S) {
 	string line;
 
 	while ( getline (inputFile,line) ) {
-		if(line[0] == '') {
+		if(line == "") {
 			continue;
 		}
 		if(line[0] == '>') {
