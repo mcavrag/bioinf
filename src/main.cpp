@@ -153,9 +153,9 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
 		}
 	}
 
-    graph.resize(rightMax + leftMax + cArray['A']);
+    graph.resize(rightMax + leftMax + cArray[SEQUENCE_SEPARATOR_INT_VALUE]);
 
-	for(int s = 0; s < cArray['A']; s++) {
+	for(int s = 0; s < cArray[SEQUENCE_SEPARATOR_INT_VALUE]; s++) {
 		int id = rightMax + leftMax + s;
 		//cout << "id is " << id << endl;
 		graph[id] = Node(1, s, 1, s);
@@ -236,9 +236,6 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
 
 							Q.push_back(newId);
 						}
-					} else {
-						graph.at(id).lb = lb;
-						graph.at(id).len = len;						
 					}
 				}
 			}
@@ -268,7 +265,7 @@ int main(int argc, char** argv) {
 	bool originalPrint = false;
 	// Check input parameters
 	if(argc != 3 && argc != 4) {
-		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa -k=<Integer> --orginalPrint" << endl;
+		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa -k=<Integer> --originalPrint" << endl;
 		return 1;
 	}
 
@@ -280,10 +277,10 @@ int main(int argc, char** argv) {
 	//cout << S << endl;
 
 	string kString = argv[2];
-	int k = stoi(kString.substr(kString.size() - 3, kString.size()));
+	int k = stoi(kString.substr(3, kString.size()));
 
-	if ((argc == 4) && ((string)argv[3] == "--orginalPrint")) {
- 		orginalPrint = true;
+	if ((argc == 4) && ((string)argv[3] == "--originalPrint")) {
+ 		originalPrint = true;
  	}
 
 	//cout << k << endl;
