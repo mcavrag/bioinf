@@ -63,7 +63,7 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 
 	uint64_t i;
 
-	cout << lcpFull << endl;
+	//cout << lcpFull << endl;
 
 	//vector<char> BWTshifted(BWT.size()+1);
 
@@ -114,7 +114,7 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 		}
 	}
 
-	cout << counter << endl;
+	//cout << counter << endl;
 
 	//cout << cArray << endl;
 
@@ -126,7 +126,7 @@ static bool cmp(const Node &a, const Node &b) {
     return a.lb < b.lb;
 }
 
-void createCompressedGraph(uint64_t k, string BWT) {
+void createCompressedGraph(int k, string BWT, bool originalPrint) {
     vector<Node> graph;
     deque<uint64_t> Q;
     bit_vector Bl, Br;
@@ -163,19 +163,19 @@ void createCompressedGraph(uint64_t k, string BWT) {
 		Bl[s] = 0;
 	}
 
-	cout << "Queue size " << Q.size() << endl;
+	// cout << "Queue size " << Q.size() << endl;
 
-	cout << "wt sigma is " << wt.sigma << endl;
+	// cout << "wt sigma is " << wt.sigma << endl;
 
 	uint64_t quantity;
 	vector<uint8_t> list(wt.sigma);
     vector<uint64_t> rank_c_i(wt.sigma);
     vector<uint64_t> rank_c_j(wt.sigma);
 
-    cout << wt << endl;
+    // cout << wt << endl;
 
     for(int i = 0; i < wt.size(); i++) {
-    	if(wt[i] == 0) {cout << i << endl;}
+    	// if(wt[i] == 0) {cout << i << endl;}
     }
 
 	int count = 0;
@@ -247,19 +247,28 @@ void createCompressedGraph(uint64_t k, string BWT) {
 	}
 
 		vector<Node> G(graph.size());
-		for(int i = 0; i < graph.size(); ++i) G.push_back(graph[i]);
+		for(int i = 0; i < graph.size(); ++i) {
+			G.push_back(graph[i]);
+		}
 		sort(G.begin(), G.end(), cmp);
 
 		for (int i = 0; i < G.size(); ++i) {
-			if(!G[i].len) continue;
-			cout << G[i].len << " " <<  G[i].lb << " " << G[i].size << " " << G[i].suffix_lb << endl;
+			if(!G[i].len) {
+				continue;
+			} else if (originalPrint) {
+				cout << G[i].len << " " <<  G[i].lb << endl;
+			} else {
+				cout << G[i].len << " " <<  G[i].lb << " " << G[i].size << " " << G[i].suffix_lb << endl;
+			};
 		}
 }
 
 int main(int argc, char** argv) {
+	
+	bool originalPrint = false;
 	// Check input parameters
-	if(argc != 4) {
-		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa output_file_name input/file_name_input.k" << endl;
+	if(argc != 3 && argc != 4) {
+		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa -k=<Integer> --orginalPrint" << endl;
 		return 1;
 	}
 
@@ -270,12 +279,12 @@ int main(int argc, char** argv) {
 
 	//cout << S << endl;
 
-	int k;
+	string kString = argv[2];
+	int k = stoi(kString.substr(kString.size() - 3, kString.size()));
 
-	if(Helper::readInputK(argv[3], k)) {
-		cerr << "Error in reading file_name_input.k" << endl;
-		return 1;
-	}
+	if ((argc == 4) && ((string)argv[3] == "--orginalPrint")) {
+ 		orginalPrint = true;
+ 	}
 
 	//cout << k << endl;
 
@@ -290,7 +299,7 @@ int main(int argc, char** argv) {
 
     //cout << bwt << endl;
 
-	createCompressedGraph(k, bwt);
+	createCompressedGraph(k, bwt, originalPrint);
 
 	return 0;
 }
