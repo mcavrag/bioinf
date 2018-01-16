@@ -22,14 +22,14 @@ struct Node {
 };
 
 string S = "";
-wt_blcd<> wt;
+wt_huff<> wt;
 
-void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q, bit_vector& Bl, bit_vector& Br) {
+void createBitVectors(int k, string BWT, vector<Node>& graph, queue<uint64_t>& Q, bit_vector& Bl, bit_vector& Br) {
 	// Construct WT used for C array from BWT
 	construct_im(wt, BWT, 1);
 
 	// Construct LCP from sequence
-	lcp_bitcompressed<> lcp;
+	lcp_wt<> lcp;
 	construct_im(lcp, S, 1);
 
 	// Compute the C array.
@@ -47,19 +47,21 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 	Bl = bit_vector(BWT.size(), 0);
 	Br = bit_vector(BWT.size(), 0);
 
-	cout << lcp.size() << endl;
-	cout << S.size() << endl;
-	cout << BWT.size() << endl;
-
 	bool open = false;
 	uint64_t lb = 1;
 	uint64_t kIndex = 0;
 	uint64_t lastDiff = 0;
 	uint64_t counter = 0;
+	
+	
 
-	//cout << lcp << endl;
+	vector<int> lcpFull(lcp.size()+1);
 
-	//vector<int> lcpFull(lcp.size()+1);
+	for(int i = 0; i < lcp.size(); i++) {
+		lcpFull[i] = lcp[i];
+	}
+
+	lcpFull[lcp.size()] = -1;
 
 	uint64_t i;
 
@@ -69,19 +71,19 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, deque<uint64_t>& Q
 
 	//cout << BWTshifted.size() << endl;
 
-	for(int i = 1; i <= lcp.size(); i++) {
+	for(int i = 1; i < lcpFull.size(); i++) {
 		cArray[BWT[i-1]]++;
-		if(lcp[i] >= k) {
+		if(lcpFull[i] >= k) {
 		//	cout << "last lcp is " << lcpFull[i] << " and k is " << k << endl;
 			open = true;
-			kIndex = (lcp[i] == k ? i : kIndex);
+			kIndex = (lcpFull[i] == k ? i : kIndex);
 		} else {
 			if(open) {
 				if(kIndex > lb) {
 					Br[lb] = 1;
 					Br[i-1] = 1;
 					graph.push_back(Node(k, lb, i - lb, lb));
-					Q.push_back(counter++);
+					Q.push(counter++);
 				}
 				if(lastDiff > lb) {
 					for(int j = lb; j < i; j++) {
@@ -128,7 +130,7 @@ static bool cmp(const Node &a, const Node &b) {
 
 void createCompressedGraph(int k, string BWT, bool originalPrint) {
     vector<Node> graph;
-    deque<uint64_t> Q;
+    queue<uint64_t> Q;
     bit_vector Bl, Br;
 
     createBitVectors(k, BWT, graph, Q, Bl, Br);
@@ -139,8 +141,8 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
     uint64_t rightMax = Br_rank(BWT.size()+1)/2.;
     uint64_t leftMax = Bl_rank(BWT.size()+1);
 
-   	cout << "Right max: " << rightMax << endl;
-   	cout << "Left max: " << leftMax << endl;
+   	//cout << "Right max: " << rightMax << endl;
+   	//cout << "Left max: " << leftMax << endl;
 
    	vector<uint64_t> cArray(UCHAR_MAX, 0);
 
@@ -159,7 +161,7 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
 		int id = rightMax + leftMax + s;
 		//cout << "id is " << id << endl;
 		graph[id] = Node(1, s, 1, s);
-		Q.push_back(id);
+		Q.push(id);
 		Bl[s] = 0;
 	}
 
@@ -172,11 +174,6 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
     vector<uint64_t> rank_c_i(wt.sigma);
     vector<uint64_t> rank_c_j(wt.sigma);
 
-    // cout << wt << endl;
-
-    for(int i = 0; i < wt.size(); i++) {
-    	// if(wt[i] == 0) {cout << i << endl;}
-    }
 
 	int count = 0;
 	uint64_t id = 0;
@@ -184,15 +181,8 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
 	uint64_t queueStartSize = Q.size();
 
 	while(!Q.empty()) {
-		if(count < queueStartSize) {
-			id = Q.front();
-			Q.pop_front();
-		} else {
-			id = Q.back();
-			Q.pop_back();
-		}
-
-		count++;
+		id = Q.front();
+		Q.pop();
 
 		bool extendable;
 
@@ -234,7 +224,7 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
 
 							graph[newId] = Node(k, l, r-l+1, l);
 
-							Q.push_back(newId);
+							Q.push(newId);
 						}
 					}
 				}
