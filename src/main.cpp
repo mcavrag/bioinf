@@ -30,6 +30,9 @@ string S = "";
 wt_huff<> wt;
 fsec elapsed_seconds_A1;
 
+// Written by Luka Kovačić and Bruna Anđelić
+// Created: 14.1.2018.
+
 void createBitVectors(int k, string BWT, vector<Node>& graph, queue<uint64_t>& Q, bit_vector& Bl, bit_vector& Br) {
 	// Construct WT used for C array from BWT
 	construct_im(wt, BWT, 1);
@@ -112,6 +115,9 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, queue<uint64_t>& Q
 static bool cmp(const Node &a, const Node &b) {
     return a.lb < b.lb;
 }
+
+// Written by Bruna Anđelić and Matija Čavrag
+// Created: 15.1.2018.
 
 void createCompressedGraph(int k, string BWT, int print) {
     vector<Node> graph;
