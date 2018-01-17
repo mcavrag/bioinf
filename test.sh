@@ -246,7 +246,7 @@ fi
 
 echo "....Testing against the last year student project...."
 
-output=`./debruijn.exe input/small.fa -k=3`
+output=`./debruijn.exe input/small.fa -k=3 --lastYearPrint`
 againstFile="test/lastYearStudents/small_3.out"
 lastYearStudents=`cat $againstFile`
 
@@ -256,7 +256,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/small.fa -k=4`
+output=`./debruijn.exe input/small.fa -k=4 --lastYearPrint`
 againstFile="test/lastYearStudents/small_4.out"
 lastYearStudents=`cat $againstFile`
 
@@ -266,7 +266,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/small.fa -k=8`
+output=`./debruijn.exe input/small.fa -k=8 --lastYearPrint`
 againstFile="test/lastYearStudents/small_8.out"
 lastYearStudents=`cat $againstFile`
 
@@ -276,7 +276,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/medium.fa -k=4`
+output=`./debruijn.exe input/medium.fa -k=4 --lastYearPrint`
 againstFile="test/lastYearStudents/medium_4.out"
 lastYearStudents=`cat $againstFile`
 
@@ -286,7 +286,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/medium.fa -k=10`
+output=`./debruijn.exe input/medium.fa -k=10 --lastYearPrint`
 againstFile="test/lastYearStudents/medium_10.out"
 lastYearStudents=`cat $againstFile`
 
@@ -296,7 +296,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/medium.fa -k=100`
+output=`./debruijn.exe input/medium.fa -k=100 --lastYearPrint`
 againstFile="test/lastYearStudents/medium_100.out"
 lastYearStudents=`cat $againstFile`
 
@@ -306,7 +306,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/medium.fa -k=1000`
+output=`./debruijn.exe input/medium.fa -k=1000 --lastYearPrint`
 againstFile="test/lastYearStudents/medium_1000.out"
 lastYearStudents=`cat $againstFile`
 
@@ -316,7 +316,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/large.fa -k=100`
+output=`./debruijn.exe input/large.fa -k=100 --lastYearPrint`
 againstFile="test/lastYearStudents/large_100.out"
 lastYearStudents=`cat $againstFile`
 
@@ -326,7 +326,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/large.fa -k=1000`
+output=`./debruijn.exe input/large.fa -k=1000 --lastYearPrint`
 againstFile="test/lastYearStudents/large_1000.out"
 lastYearStudents=`cat $againstFile`
 
@@ -336,7 +336,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/gen/rand_100.fa -k=4`
+output=`./debruijn.exe input/gen/rand_100.fa -k=4 --lastYearPrint`
 againstFile="test/lastYearStudents/gen/rand_100_4.out"
 lastYearStudents=`cat $againstFile`
 
@@ -346,7 +346,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/gen/rand_100.fa -k=8`
+output=`./debruijn.exe input/gen/rand_100.fa -k=8 --lastYearPrint`
 againstFile="test/lastYearStudents/gen/rand_100_8.out"
 lastYearStudents=`cat $againstFile`
 
@@ -356,7 +356,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/gen/rand_1000.fa -k=4`
+output=`./debruijn.exe input/gen/rand_1000.fa -k=4 --lastYearPrint`
 againstFile="test/lastYearStudents/gen/rand_1000_4.out"
 lastYearStudents=`cat $againstFile`
 
@@ -366,7 +366,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/gen/rand_1000.fa -k=8`
+output=`./debruijn.exe input/gen/rand_1000.fa -k=8 --lastYearPrint`
 againstFile="test/lastYearStudents/gen/rand_1000_8.out"
 lastYearStudents=`cat $againstFile`
 
@@ -376,7 +376,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/gen/rand_1000.fa -k=10`
+output=`./debruijn.exe input/gen/rand_1000.fa -k=10 --lastYearPrint`
 againstFile="test/lastYearStudents/gen/rand_1000_10.out"
 lastYearStudents=`cat $againstFile`
 
@@ -386,7 +386,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/gen/rand_1000.fa -k=100`
+output=`./debruijn.exe input/gen/rand_1000.fa -k=100 --lastYearPrint`
 againstFile="test/lastYearStudents/gen/rand_1000_100.out"
 lastYearStudents=`cat $againstFile`
 
@@ -396,7 +396,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/gen/rand_10000.fa -k=10`
+output=`./debruijn.exe input/gen/rand_10000.fa -k=10 --lastYearPrint`
 againstFile="test/lastYearStudents/gen/rand_10000_10.out"
 lastYearStudents=`cat $againstFile`
 
@@ -406,7 +406,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/gen/rand_10000.fa -k=100`
+output=`./debruijn.exe input/gen/rand_10000.fa -k=100 --lastYearPrint`
 againstFile="test/lastYearStudents/gen/rand_10000_100.out"
 lastYearStudents=`cat $againstFile`
 
@@ -416,7 +416,7 @@ else
 	echo $againstFile "NOT OK!!!!!!!!"
 fi
 
-output=`./debruijn.exe input/gen/rand_100000.fa -k=100`
+output=`./debruijn.exe input/gen/rand_100000.fa -k=100 --lastYearPrint`
 againstFile="test/lastYearStudents/gen/rand_100000_100.out"
 lastYearStudents=`cat $againstFile`
 

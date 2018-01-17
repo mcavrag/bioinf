@@ -113,7 +113,7 @@ static bool cmp(const Node &a, const Node &b) {
     return a.lb < b.lb;
 }
 
-void createCompressedGraph(int k, string BWT, bool originalPrint) {
+void createCompressedGraph(int k, string BWT, int print) {
     vector<Node> graph;
     queue<uint64_t> Q;
     bit_vector Bl, Br;
@@ -212,20 +212,27 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
 		}
 		sort(G.begin(), G.end(), cmp);
 
+		ofstream out;
+		if (print == 0) {
+    		out.open("outputFile.out");
+		}
+
 		for (uint64_t i = 0; i < G.size(); ++i) {
 			if(!G[i].len) {
 				continue;
-			} else if (originalPrint) {
+			} else if (print == 1) {
 				cout << G[i].len << " " <<  G[i].lb << endl;
-			} else {
+			} else if (print == 2) {
 				cout << G[i].len << " " <<  G[i].lb << " " << G[i].size << " " << G[i].suffix_lb << endl;
-			};
+			} else {
+				out << G[i].len << " " <<  G[i].lb << " " << G[i].size << " " << G[i].suffix_lb << endl;
+			}
 		}
 }
 
 int main(int argc, char** argv) {
 	
-	bool originalPrint = false;
+	int print = 0;
 	// Check input parameters
 	if(argc != 3 && argc != 4) {
 		cerr << "Error in passing parameters! The program should be called with: ./program_name input/input_file_name.fa -k=<Integer> --originalPrint" << endl;
@@ -241,7 +248,9 @@ int main(int argc, char** argv) {
 	int k = stoi(kString.substr(3, kString.size()));
 
 	if ((argc == 4) && ((string)argv[3] == "--originalPrint")) {
- 		originalPrint = true;
+ 		print = 1;
+ 	} else if ((argc == 4) && ((string)argv[3] == "--lastYearPrint")) {
+ 		print = 2;
  	}
 
 	// constructing SA
@@ -253,16 +262,16 @@ int main(int argc, char** argv) {
 
     auto startTime = Time::now();
     fsec elapsed_seconds_A2;
-    cout << "Time=" << elapsed_seconds_A2.count() << endl;
+    //cout << "Time=" << elapsed_seconds_A2.count() << endl;
 
-	createCompressedGraph(k, bwt, originalPrint);
+	createCompressedGraph(k, bwt, print);
 
 	fsec total = Time::now() - startTime;
 	elapsed_seconds_A2 = total - elapsed_seconds_A1;
-	cout << "Total time for A1 is=" << elapsed_seconds_A1.count() << endl;
-    cout << "Total time for A2 is=" << elapsed_seconds_A2.count() << endl;
+	//cout << "Total time for A1 is=" << elapsed_seconds_A1.count() << endl;
+    //cout << "Total time for A2 is=" << elapsed_seconds_A2.count() << endl;
 
-    cout << "Total time= " << total.count() << endl;
+    //cout << "Total time= " << total.count() << endl;
 
 	return 0;
 }
