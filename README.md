@@ -50,3 +50,10 @@ cd REPO_NAME
 	--lastYearPrint
 	<without argument>	- print in file
 ```
+
+## Testing
+
+```sh
+cd REPO_NAME
+./test.sh
+```
