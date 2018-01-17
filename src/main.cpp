@@ -5,6 +5,11 @@
 #include <sdsl/lcp.hpp>
 #include "helper.h"
 #include <deque>
+#include <cfloat>
+#include <chrono>
+
+typedef chrono::high_resolution_clock Time;
+typedef chrono::duration<float> fsec;
 
 using namespace std;
 using namespace sdsl;
@@ -23,6 +28,7 @@ struct Node {
 
 string S = "";
 wt_huff<> wt;
+fsec elapsed_seconds_A1;
 
 void createBitVectors(int k, string BWT, vector<Node>& graph, queue<uint64_t>& Q, bit_vector& Bl, bit_vector& Br) {
 	// Construct WT used for C array from BWT
@@ -52,20 +58,16 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, queue<uint64_t>& Q
 	uint64_t kIndex = 0;
 	uint64_t lastDiff = 0;
 	uint64_t counter = 0;
-	
-	
 
 	vector<int> lcpFull(lcp.size()+1);
 
-	for(int i = 0; i < lcp.size(); i++) {
+	for(uint64_t i = 0; i < lcp.size(); i++) {
 		lcpFull[i] = lcp[i];
 	}
 
 	lcpFull[lcp.size()] = -1;
 
-	uint64_t i;
-
-	for(int i = 1; i < lcpFull.size(); i++) {
+	for(uint64_t i = 1; i < lcpFull.size(); i++) {
 		cArray[BWT[i-1]]++;
 		if(lcpFull[i] >= k) {
 			open = true;
@@ -79,7 +81,7 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, queue<uint64_t>& Q
 					Q.push(counter++);
 				}
 				if(lastDiff > lb) {
-					for(int j = lb; j < i; j++) {
+					for(uint64_t j = lb; j < i; j++) {
 						char c = BWT[j];
 						if((c != 0) && (c != '%')) {
 							Bl[cArray[c]-1] = 1;
@@ -96,7 +98,7 @@ void createBitVectors(int k, string BWT, vector<Node>& graph, queue<uint64_t>& Q
 	}
 	open = false;
 
-	for(int i = 0; i < lcp.size(); i++) {
+	for(uint64_t i = 0; i < lcp.size(); i++) {
 		if(open) {
 			Bl[i] = 0;
 			if(Br[i]) open = false;
@@ -116,7 +118,11 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
     queue<uint64_t> Q;
     bit_vector Bl, Br;
 
-    createBitVectors(k, BWT, graph, Q, Bl, Br);
+    auto startTime = Time::now();
+
+	createBitVectors(k, BWT, graph, Q, Bl, Br);
+
+	elapsed_seconds_A1 = Time::now() - startTime;
 
     bit_vector::rank_1_type Br_rank(&Br);
     bit_vector::rank_1_type Bl_rank(&Bl);
@@ -137,8 +143,8 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
 
     graph.resize(rightMax + leftMax + cArray[SEQUENCE_SEPARATOR_INT_VALUE]);
 
-	for(int s = 0; s < cArray[SEQUENCE_SEPARATOR_INT_VALUE]; s++) {
-		int id = rightMax + leftMax + s;
+	for(uint64_t s = 0; s < cArray[SEQUENCE_SEPARATOR_INT_VALUE]; s++) {
+		uint64_t id = rightMax + leftMax + s;
 		graph[id] = Node(1, s, 1, s);
 		Q.push(id);
 		Bl[s] = 0;
@@ -149,11 +155,7 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
     vector<uint64_t> rank_c_i(wt.sigma);
     vector<uint64_t> rank_c_j(wt.sigma);
 
-
-	int count = 0;
 	uint64_t id = 0;
-
-	uint64_t queueStartSize = Q.size();
 
 	while(!Q.empty()) {
 		id = Q.front();
@@ -205,12 +207,12 @@ void createCompressedGraph(int k, string BWT, bool originalPrint) {
 	}
 
 		vector<Node> G(graph.size());
-		for(int i = 0; i < graph.size(); ++i) {
+		for(uint64_t i = 0; i < graph.size(); ++i) {
 			G.push_back(graph[i]);
 		}
 		sort(G.begin(), G.end(), cmp);
 
-		for (int i = 0; i < G.size(); ++i) {
+		for (uint64_t i = 0; i < G.size(); ++i) {
 			if(!G[i].len) {
 				continue;
 			} else if (originalPrint) {
@@ -249,7 +251,18 @@ int main(int argc, char** argv) {
 	// BWT of S
     string bwt = util::to_string(csa.bwt);
 
+    auto startTime = Time::now();
+    fsec elapsed_seconds_A2;
+    cout << "Time=" << elapsed_seconds_A2.count() << endl;
+
 	createCompressedGraph(k, bwt, originalPrint);
+
+	fsec total = Time::now() - startTime;
+	elapsed_seconds_A2 = total - elapsed_seconds_A1;
+	cout << "Total time for A1 is=" << elapsed_seconds_A1.count() << endl;
+    cout << "Total time for A2 is=" << elapsed_seconds_A2.count() << endl;
+
+    cout << "Total time= " << total.count() << endl;
 
 	return 0;
 }
