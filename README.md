@@ -43,5 +43,10 @@ make -j4
 
 ```sh
 cd REPO_NAME
-./debruijn.exe input/XXX.fa output input/XXX.k
+./debruijn.exe input/XXX.fa -k=<Integer> --printMode
+
+--printMode
+	--originalPrint
+	--lastYearPrint
+	<without argument>	- print in file
 ```
