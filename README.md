@@ -17,7 +17,6 @@ cd REPO_NAME/install
 tar -xzvf cmake-3.10.1.tar.gz
 cd cmake-3.10.1
 sudo ./bootstrap --prefix=/usr
-make
 sudo make install
 ```
 
